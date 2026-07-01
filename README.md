@@ -1,4 +1,4 @@
-# sadir
+# GraphShield
 
 sadir is an AI-powered Anti-Money Laundering (AML) system that combines Graph Neural Networks, traditional Machine Learning, and Explainable AI to detect suspicious transaction patterns and provide investigators with transparent reasoning behind every prediction.
 
