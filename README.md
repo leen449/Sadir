@@ -126,7 +126,7 @@ Special focus is placed on:
 
 # Team
 
-sadir team 
+GraphShield team 
 # Architecture
 ## Architecture
  
