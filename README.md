@@ -128,37 +128,40 @@ Special focus is placed on:
 
 sadir team 
 # Architecture
+## Architecture
+ 
 ```
-
 GraphShield/
 │
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
+├── .gitattributes
 │
-├── app/                         # Frontend / Streamlit application
+├── app/                              # Frontend / Streamlit application
 │   │
-│   ├── main.py                  # Streamlit entry point
+│   ├── main.py                       # Streamlit entry point
 │   │
 │   ├── pages/
-│   │    ├── dashboard.py             # Overall AML dashboard
+│   │    ├── dashboard.py             # Overall AML dashboard + 3D graph
 │   │    ├── transaction_analysis.py  # Risk + explanation view
-│   │    └── network_view.py          # 3D graph visualization
+│   │    └── network_view.py          # Predictions table + metrics
 │   │
 │   ├── components/
-│   │    ├── risk_card.py             # Risk score display
+│   │    ├── __init__.py
+│   │    ├── data_loader.py           # Cached artifact loader (all paths)
+│   │    ├── graph_builder.py         # Builds node/edge data for 3D viewer
+│   │    ├── graph_viewer.py          # ForceGraph3D HTML component
+│   │    ├── risk_card.py             # Risk score display widget
 │   │    ├── explanation_panel.py     # SHAP + GNN explanation display
-│   │    ├── graph_viewer.py          # ForceGraph3D component
-│   │    └── charts.py                # Metrics / plots
+│   │    └── charts.py               # Metrics / plots
 │   │
 │   └── assets/
-│      
-│        
 │
 │
-├── backend/                     # AI backend logic
+├── backend/                          # AI backend logic
 │   │
-│   ├── models/                       # Model definitions ONLY
+│   ├── models/                       # Model definitions only
 │   │    ├── gatv2.py
 │   │    ├── xgboost_model.py
 │   │    └── hybrid_model.py
@@ -167,7 +170,7 @@ GraphShield/
 │   │    ├── predictor.py
 │   │    └── risk_scoring.py
 │   │
-│   ├── explainability/               # Reading/generating explanations
+│   ├── explainability/               # Reading / generating explanations
 │   │    ├── shap_explainer.py
 │   │    └── gnn_explainer.py
 │   │
@@ -187,39 +190,45 @@ GraphShield/
 │   │    └── gatv2_predictions.csv
 │   │
 │   ├── explanations/
-│   │    │
 │   │    ├── shap/
 │   │    │    └── transaction_explanations.csv
-│   │    │
 │   │    └── gnn/
 │   │         ├── important_nodes.csv
 │   │         ├── important_edges.csv
 │   │         └── explanation_graph.json
 │   │
 │   ├── graphs/
-|   |    ├── pyg_graph.pt
+│   │    ├── pyg_graph.pt
 │   │    └── fraud_network.json
-|   |
-|   ├── embeddings/
+│   │
+│   ├── embeddings/
 │   │    └── transaction_ids.csv
-|   |
-|   ├── shared/
+│   │
+│   ├── shared/
 │   │    └── feature_categories.json
-|   |     
 │   │
 │   └── metrics/
 │        ├── final_metrics.json
-│        ├── confusion_matrix.png
+│        ├── confusion_matrices.png
 │        └── roc_curve.png
 │
+│
 ├── notebooks/
-│   │
 │   ├── 01_training.ipynb
 │   ├── 02_explainability.ipynb
 │   └── 03_visualization.ipynb
 │
+│
 └── deployment/
-    │
     ├── Dockerfile
     └── azure_deployment.md
+```
+ 
+---
+ 
+## Running the App
+ 
+```bash
+pip install -r requirements.txt
+streamlit run app/main.py
 ```
