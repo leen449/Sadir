@@ -196,9 +196,16 @@ sadir/
 │   │         ├── important_edges.csv
 │   │         └── explanation_graph.json
 │   │
-│   │
 │   ├── graphs/
+|   |    ├── pyg_graph.pt
 │   │    └── fraud_network.json
+|   |
+|   ├── embeddings/
+│   │    └── transaction_ids.csv
+|   |
+|   ├── shared/
+│   │    └── feature_categories.json
+|   |     
 │   │
 │   └── metrics/
 │        ├── final_metrics.json
