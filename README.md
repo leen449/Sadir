@@ -128,7 +128,7 @@ Special focus is placed on:
 
 sadir team 
 # Architecture
-```mermaid
+```
 
 sadir/
 │
