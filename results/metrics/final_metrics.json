@@ -1,0 +1,55 @@
+{
+  "split": {
+    "train_max_step": 30,
+    "val_steps": "31-39",
+    "test_min_step": 40
+  },
+  "XGBoost": {
+    "model": "XGBoost",
+    "threshold": 0.8,
+    "licit_f1": 0.9849246231155779,
+    "illicit_f1": 0.7013953488372093,
+    "macro_f1": 0.8431599859763936,
+    "roc_auc": 0.8749549826728009
+  },
+  "GATv2": {
+    "model": "GATv2",
+    "threshold": 0.5,
+    "licit_f1": 0.5941040079496522,
+    "illicit_f1": 0.15756909115908155,
+    "macro_f1": 0.3758365495543669,
+    "roc_auc": 0.7652651967764015
+  },
+  "Hybrid": {
+    "model": "Hybrid",
+    "xgb_alpha": 0.9,
+    "threshold": 0.8,
+    "licit_f1": 0.9850199577365579,
+    "illicit_f1": 0.7027027027027027,
+    "macro_f1": 0.8438613302196303,
+    "roc_auc": 0.8717833480012305
+  },
+  "summary": [
+    {
+      "Model": "XGBoost",
+      "Class 0 F1 (Licit)": 0.9849246231155779,
+      "Class 1 F1 (Illicit)": 0.7013953488372093,
+      "Macro F1": 0.8431599859763936,
+      "ROC-AUC": 0.8749549826728009
+    },
+    {
+      "Model": "GATv2",
+      "Class 0 F1 (Licit)": 0.5941040079496522,
+      "Class 1 F1 (Illicit)": 0.15756909115908155,
+      "Macro F1": 0.3758365495543669,
+      "ROC-AUC": 0.7652651967764015
+    },
+    {
+      "Model": "Hybrid",
+      "Class 0 F1 (Licit)": 0.9850199577365579,
+      "Class 1 F1 (Illicit)": 0.7027027027027027,
+      "Macro F1": 0.8438613302196303,
+      "ROC-AUC": 0.8717833480012305
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "ranges": [
+    {
+      "prefix": "V",
+      "start": 1,
+      "end": 94,
+      "category": "transaction_profile",
+      "label": "Transaction Profile",
+      "description": "Raw local activity pattern (amount, fees, time, inputs/outputs)"
+    },
+    {
+      "prefix": "V",
+      "start": 95,
+      "end": 166,
+      "category": "network_context",
+      "label": "Network Context",
+      "description": "Aggregated one-hop neighbor statistics (in/out-degree, neighbor activity)"
+    },
+    {
+      "prefix": "emb",
+      "start": 0,
+      "end": 127,
+      "category": "hidden_topology",
+      "label": "Hidden Topological Patterns",
+      "description": "Learned GATv2 graph-context embedding (not individually interpretable)"
+    }
+  ],
+  "source": "Weber et al. 2019 local/aggregate split, mapped to this project's V1-V166 (1-indexed) feature columns and the actual GATv2 embedding width (hidden_channels=16 x heads=8 = 128)."
+}
