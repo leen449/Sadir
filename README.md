@@ -232,14 +232,5 @@ GraphShield/
 pip install -r requirements.txt
 streamlit run app/main.py
 ```
-# Development Progress
-
-This video showcases the current implementation of **GraphShield** at the first project milestone (~30% completion). It demonstrates the features implemented so far and the current application workflow. Additional AI models, backend services, and system components will be integrated during the upcoming development phases.
-
-> **Note:** This is an intermediate prototype intended to demonstrate project progress. It does not represent the final version of the system.
----
-<p align="center">
-  <video src="https://www.capcut.com/player/7657904083868794881?workspaceId=7435205002270081041" width="80%" controls></video>
-</p>
 
 
