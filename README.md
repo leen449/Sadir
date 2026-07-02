@@ -239,8 +239,7 @@ This video showcases the current implementation of **GraphShield** at the first 
 > **Note:** This is an intermediate prototype intended to demonstrate project progress. It does not represent the final version of the system.
 ---
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/3c027ec3-e5b4-4dc8-8c55-f032e5dae168 
-" width="80%" controls>
-  </video>
+  <video src="https://github.com/user-attachments/assets/3c027ec3-e5b4-4dc8-8c55-f032e5dae168" width="80%" controls></video>
 </p>
+
 
