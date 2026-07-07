@@ -131,7 +131,7 @@ GraphShield team
 ## Architecture
  
 ```
-GraphShield/
+GraphShields/
 │
 ├── README.md
 ├── requirements.txt
@@ -148,7 +148,7 @@ GraphShield/
 │   │    └── network_view.py          # Predictions table + metrics
 │   │
 │   ├── components/
-│   │    ├── __init__.py
+│   │    ├── init.py
 │   │    ├── data_loader.py           # Cached artifact loader (all paths)
 │   │    ├── graph_builder.py         # Builds node/edge data for 3D viewer
 │   │    ├── graph_viewer.py          # ForceGraph3D HTML component
@@ -156,26 +156,32 @@ GraphShield/
 │   │    ├── explanation_panel.py     # SHAP + GNN explanation display
 │   │    └── charts.py               # Metrics / plots
 │   │
+│   ├── backend/                      # LLM explanation backend
+│   │   │
+│   │   ├── .gitignore
+│   │   ├── config.py                 # Loads Azure OpenAI settings from .env
+│   │   │
+│   │   ├── services/
+│   │   │    ├── artifact_service.py      # Reads/caches CSV & JSON artifacts (read-only)
+│   │   │    ├── transaction_service.py   # Builds TransactionContext for a selected transaction
+│   │   │    └── llm_service.py           # Prompt selection, evidence injection, Azure OpenAI call
+│   │   │
+│   │   ├── security/
+│   │   │    └── validation.py            # Validates requests before any Azure call
+│   │   │
+│   │   ├── prompts/
+│   │   │    ├── system_prompt.txt
+│   │   │    ├── initial_analysis_prompt.txt
+│   │   │    ├── question_1_positive_shap.txt
+│   │   │    ├── question_2_gnn_neighbors.txt
+│   │   │    └── question_3_negative_shap.txt
+│   │   │
+│   │   ├── utils/
+│   │   │    └── cache.py                 # ArtifactCache (process-lifetime) + ExecutiveSummaryCache (TTL)
+│   │   │
+│   │   └── test_llm_backend.py           # Standalone test suite
+│   │
 │   └── assets/
-│
-│
-├── backend/                          # AI backend logic
-│   │
-│   ├── models/                       # Model definitions only
-│   │    ├── gatv2.py
-│   │    ├── xgboost_model.py
-│   │    └── hybrid_model.py
-│   │
-│   ├── inference/                    # Loading weights + prediction
-│   │    ├── predictor.py
-│   │    └── risk_scoring.py
-│   │
-│   ├── explainability/               # Reading / generating explanations
-│   │    ├── shap_explainer.py
-│   │    └── gnn_explainer.py
-│   │
-│   └── visualization/
-│        └── force_graph.py
 │
 │
 ├── data/
@@ -220,8 +226,8 @@ GraphShield/
 │
 │
 └── deployment/
-    ├── Dockerfile
-    └── azure_deployment.md
+├── Dockerfile
+└── azure_deployment.md
 ```
  
 ---
