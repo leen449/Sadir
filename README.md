@@ -131,62 +131,58 @@ GraphShield team
 ## Architecture
  
 ```
-GraphShields/
+GraphShield/
 │
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
 ├── .gitattributes
 │
-├── app/                              # Frontend / Streamlit application
+├── app/
 │   │
-│   ├── main.py                       # Streamlit entry point
+│   ├── main.py
 │   │
 │   ├── pages/
-│   │    ├── dashboard.py             # Overall AML dashboard + 3D graph
-│   │    ├── transaction_analysis.py  # Risk + explanation view
-│   │    └── network_view.py          # Predictions table + metrics
+│   │    ├── dashboard.py             # Investigation workspace, graph, LLM interactions, report generation and history
+│   │    ├── transaction_analysis.py  # Transaction analysis page
+│   │    └── network_view.py          # Network/prediction view
 │   │
 │   ├── components/
-│   │    ├── init.py
-│   │    ├── data_loader.py           # Cached artifact loader (all paths)
-│   │    ├── graph_builder.py         # Builds node/edge data for 3D viewer
-│   │    ├── graph_viewer.py          # ForceGraph3D HTML component
-│   │    ├── risk_card.py             # Risk score display widget
-│   │    ├── explanation_panel.py     # SHAP + GNN explanation display
-│   │    └── charts.py               # Metrics / plots
+│   │    ├── data_loader.py           # Cached artifact loader
+│   │    ├── graph_builder.py         # Builds graph node/edge data
+│   │    ├── graph_viewer.py          # ForceGraph3D interactive component
+│   │    └── report_history.py        # Displays Report History and report download actions
 │   │
-│   ├── backend/                      # LLM explanation backend
-│   │   │
-│   │   ├── .gitignore
-│   │   ├── config.py                 # Loads Azure OpenAI settings from .env
-│   │   │
-│   │   ├── services/
-│   │   │    ├── artifact_service.py      # Reads/caches CSV & JSON artifacts (read-only)
-│   │   │    ├── transaction_service.py   # Builds TransactionContext for a selected transaction
-│   │   │    └── llm_service.py           # Prompt selection, evidence injection, Azure OpenAI call
-│   │   │
-│   │   ├── security/
-│   │   │    └── validation.py            # Validates requests before any Azure call
-│   │   │
-│   │   ├── prompts/
-│   │   │    ├── system_prompt.txt
-│   │   │    ├── initial_analysis_prompt.txt
-│   │   │    ├── question_1_positive_shap.txt
-│   │   │    ├── question_2_gnn_neighbors.txt
-│   │   │    └── question_3_negative_shap.txt
-│   │   │
-│   │   ├── utils/
-│   │   │    └── cache.py                 # ArtifactCache (process-lifetime) + ExecutiveSummaryCache (TTL)
-│   │   │
-│   │   └── test_llm_backend.py           # Standalone test suite
-│   │
-│   └── assets/
-│
+│   └── backend/
+│        │
+│        ├── .gitignore
+│        ├── config.py                # Backend configuration and environment variables
+│        │
+│        ├── services/
+│        │    ├── artifact_service.py     # Reads and caches model artifacts
+│        │    ├── transaction_service.py  # Builds transaction context
+│        │    ├── llm_service.py          # LLM prompts, evidence injection, and response generation
+│        │    ├── prewarm.py              # Preloads backend artifacts/services
+│        │    ├── report_service.py       # Builds report data and generates PDF reports
+│        │    └── firebase_services.py    # Firebase initialization, report storage, metadata, listing, and retrieval
+│        │
+│        ├── security/
+│        │    └── validation.py            # Validates LLM requests
+│        │
+│        ├── prompts/
+│        │    ├── system_prompt.txt
+│        │    ├── initial_analysis_prompt.txt
+│        │    ├── question_1_positive_shap.txt
+│        │    ├── question_2_gnn_neighbors.txt
+│        │    └── question_3_negative_shap.txt
+│        │
+│        ├── utils/
+│        │    └── cache.py                 # Artifact and executive-summary caches
+│        │
+│        └── test_llm_backend.py
 │
 ├── data/
 │   └── README.md
-│
 │
 ├── results/
 │   │
@@ -213,21 +209,18 @@ GraphShields/
 │   ├── shared/
 │   │    └── feature_categories.json
 │   │
-│   └── metrics/
-│        ├── final_metrics.json
-│        ├── confusion_matrices.png
-│        └── roc_curve.png
+│   ├── metrics/
+│   │    ├── final_metrics.json
+│   │    ├── confusion_matrices.png
+│   │    ├── pr_curve.png
+│   │    └── roc_curve.png
+│   │
+│   └── notebooks/
+│        ├── 01_training.ipynb.ipynb
+│        ├── 02_explainability.ipynb.ipynb
+│        └── 03_visualization.ipynb
 │
-│
-├── notebooks/
-│   ├── 01_training.ipynb
-│   ├── 02_explainability.ipynb
-│   └── 03_visualization.ipynb
-│
-│
-└── deployment/
-├── Dockerfile
-└── azure_deployment.md
+└── node_modules/
 ```
  
 ---
