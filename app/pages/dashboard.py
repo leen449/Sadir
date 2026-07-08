@@ -17,12 +17,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 _BACKEND_ROOT = os.path.join(os.path.dirname(__file__), "..", "backend")
 sys.path.insert(0, os.path.abspath(_BACKEND_ROOT))
 
+
+
 from app.components.data_loader import load_all
 from app.components.graph_builder import build_graph_data
 from app.components.graph_viewer import render_graph
+from app.components.report_history import render_report_history
 from security.validation import ValidationError
 from services.llm_service import generate_explanation
 from services.transaction_service import SelectedNode, build_context
+from services import firebase_services, report_service
 
 st.set_page_config(
     page_title="Investigation Workspace — GraphShield",
@@ -85,6 +89,12 @@ st.session_state.setdefault("question_error", None)
 st.session_state.setdefault("question_pending_id", None)
 st.session_state.setdefault("graph_cache_key", None)
 st.session_state.setdefault("graph_cache_value", None)
+st.session_state.setdefault("report_pdf_bytes", None)
+st.session_state.setdefault("report_filename", None)
+st.session_state.setdefault("report_txid", None)
+st.session_state.setdefault("report_error", None)
+st.session_state.setdefault("report_download_token", None)
+st.session_state.setdefault("report_storage_error", None)
 
 
 def _reset_investigation_state():
@@ -246,6 +256,74 @@ if analyze_request:
         st.session_state.initial_analysis_error = None
     st.rerun()
 
+report_request = events.get("generate_report")
+if report_request:
+    print(f"[REPORT] generate_report event received: {report_request}")
+    _select_node(report_request)
+    txid = str(st.session_state.selected_node["txId"])
+    print(f"[REPORT] generation starting | txid={txid} | session_id={st.session_state.session_id}")
+    try:
+        with st.spinner("Preparing report…"):
+            pdf_bytes, filename = report_service.generate_report(
+                st.session_state.session_id, st.session_state.selected_node
+            )
+
+        if not pdf_bytes:
+            raise ValueError("report_service.generate_report returned empty PDF bytes")
+
+        st.session_state.report_pdf_bytes = pdf_bytes
+        st.session_state.report_filename = filename
+        st.session_state.report_txid = txid
+        st.session_state.report_error = None
+
+        # Persist the generated PDF and its metadata. Firebase failure does not
+        # block the user's immediate download; it is surfaced separately below.
+        try:
+            firebase_record = firebase_services.save_report(
+                pdf_bytes=pdf_bytes,
+                filename=filename,
+                transaction_id=txid,
+                status="Under Investigation",
+            )
+            st.session_state.report_storage_error = None
+            print(
+                f"[REPORT] Firebase save success | txid={txid} "
+                f"| doc_id={firebase_record['document_id']} "
+                f"| storage_path={firebase_record['storage_path']}"
+            )
+        except Exception as firebase_exc:
+            st.session_state.report_storage_error = (
+                "The report was generated and downloaded, but it could not be saved "
+                "to Report History. Check the Firebase configuration and try again."
+            )
+            print(
+                f"[REPORT] Firebase save failed | txid={txid} "
+                f"| {type(firebase_exc).__name__}: {firebase_exc}"
+            )
+            import traceback
+            traceback.print_exc()
+
+        # New token on every successful generation. The graph component uses it
+        # to auto-download exactly once after Streamlit reruns with the PDF data.
+        st.session_state.report_download_token = uuid.uuid4().hex
+
+        print(
+            f"[REPORT] generation success | txid={txid} | filename={filename} "
+            f"| bytes={len(pdf_bytes)} | token={st.session_state.report_download_token}"
+        )
+        st.rerun()
+    except Exception as exc:
+        import traceback
+
+        st.session_state.report_pdf_bytes = None
+        st.session_state.report_filename = None
+        st.session_state.report_txid = None
+        st.session_state.report_download_token = None
+        st.session_state.report_error = "Could not generate the report. Please try again."
+        print(f"[REPORT] generation failed | txid={txid} | {type(exc).__name__}: {exc}")
+        traceback.print_exc()
+        st.rerun()
+
 if st.session_state.selected_node is None:
     st.info("Click a node in the graph to open its transaction details card.")
 
@@ -304,6 +382,7 @@ if st.session_state.sidebar_open and st.session_state.selected_node is not None:
                 st.session_state.question_error = None
                 st.rerun()
 
+
 # 5. Execute pending LLM work only after the sidebar has been rendered with its
 # loading state and all question buttons disabled. Then rerun once to display
 # the returned text in the upper response area.
@@ -322,3 +401,7 @@ if st.session_state.sidebar_open and st.session_state.selected_node is not None:
         pending_question = st.session_state.question_pending_id
         _run_question(selected, pending_question)
         st.rerun()
+
+
+# 6. Shared Report History. With no login system, all saved reports are shown.
+render_report_history(storage_error=st.session_state.report_storage_error)
