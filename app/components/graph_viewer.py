@@ -4,6 +4,8 @@ The graph engine and visual interactions stay in JavaScript. The V2 component
 bridge sends discrete node and Analyze actions back to Streamlit.
 """
 
+import base64
+
 import streamlit as st
 
 _HTML = """
@@ -28,6 +30,7 @@ html,body{margin:0;padding:0;background:#0b0e14;overflow:hidden;font-family:-app
        padding:16px 18px;box-sizing:border-box;box-shadow:0 8px 24px rgba(0,0,0,.45);
        font-size:12px;line-height:1.5;display:none;z-index:20}
 #panel h3{margin:0 0 6px;font-size:14px;padding-right:20px}
+.report-error{margin-top:10px;padding:9px 10px;border-radius:7px;background:#3a1f1f;border:1px solid #7a3a3a;color:#ffb0b0;font-size:11px}
 .lbl{color:#8c93a6;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-top:9px}
 .val{color:#e8eaf0;word-break:break-word}
 .raw{color:#9299aa;font-size:10px;font-family:monospace;margin-top:2px;word-break:break-word}
@@ -88,6 +91,21 @@ export default async function(component) {
   const graphData = data.graph_data || {nodes:[], links:[]};
   const height = data.height || 650;
   const selectedTxId = data.selected_txid ? String(data.selected_txid) : null;
+  const reportTxId = data.report_txid ? String(data.report_txid) : null;
+  const reportPdfBase64 = data.report_pdf_base64 || null;
+  const reportFilename = data.report_filename || "GraphShield_Report.pdf";
+  const reportError = data.report_error || null;
+  const reportDownloadToken = data.report_download_token || null;
+
+  console.log("[REPORT][GRAPH] component state", {
+    selectedTxId,
+    reportTxId,
+    hasPdf: Boolean(reportPdfBase64),
+    pdfBase64Length: reportPdfBase64 ? reportPdfBase64.length : 0,
+    reportFilename,
+    reportDownloadToken,
+    reportError
+  });
 
   const graphEl = parentElement.querySelector("#graph");
   const panel = parentElement.querySelector("#panel");
@@ -130,15 +148,82 @@ export default async function(component) {
       <div class="lbl">Network Context Factors</div><div class="val">${listOrNA(n.network_context_factors)}</div>
       <div class="actions">
         <button id="analyze-btn" class="action-btn primary">Analyze Transaction</button>
-        <button id="report-btn" class="action-btn" disabled title="Report generation is not implemented yet">Generate Report</button>
-      </div>`;
+        <button id="report-btn" class="action-btn">Generate Report</button>
+      </div>
+      ${reportError && selectedTxId === String(n.txId) ? `<div class="report-error">⚠️ ${escapeHtml(reportError)}</div>` : ""}`;
 
     panel.querySelector("#pc").onclick = e => { e.stopPropagation(); hidePanel(); };
     panel.querySelector("#analyze-btn").onclick = e => {
       e.stopPropagation();
       setTriggerValue("analyze_transaction", nodePayload(n));
     };
+    panel.querySelector("#report-btn").onclick = e => {
+      e.stopPropagation();
+      const payload = nodePayload(n);
+      console.log("[REPORT][GRAPH] Generate Report clicked", payload);
+      setTriggerValue("generate_report", payload);
+    };
   }
+
+  function downloadReportOnce() {
+    console.log("[REPORT][GRAPH] downloadReportOnce called");
+
+    if (!reportPdfBase64) {
+      console.log("[REPORT][GRAPH] download skipped: no PDF data");
+      return;
+    }
+    if (!reportDownloadToken) {
+      console.error("[REPORT][GRAPH] download skipped: missing report_download_token");
+      return;
+    }
+    if (!reportTxId) {
+      console.error("[REPORT][GRAPH] download skipped: missing report_txid");
+      return;
+    }
+
+    const storageKey = "graphshield_report_download_token";
+    const previousToken = sessionStorage.getItem(storageKey);
+    if (previousToken === reportDownloadToken) {
+      console.log("[REPORT][GRAPH] download skipped: token already downloaded", reportDownloadToken);
+      return;
+    }
+
+    try {
+      console.log("[REPORT][GRAPH] decoding PDF", {
+        txid: reportTxId,
+        filename: reportFilename,
+        token: reportDownloadToken,
+        base64Length: reportPdfBase64.length
+      });
+
+      const binary = atob(reportPdfBase64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+      const blob = new Blob([bytes], {type: "application/pdf"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = reportFilename || "GraphShield_Report.pdf";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      sessionStorage.setItem(storageKey, reportDownloadToken);
+      console.log("[REPORT][GRAPH] download triggered successfully", {
+        filename: a.download,
+        byteLength: bytes.length,
+        token: reportDownloadToken
+      });
+
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+    } catch (err) {
+      console.error("[REPORT][GRAPH] download failed", err);
+    }
+  }
+
+  downloadReportOnce();
 
   let G = parentElement.__graphShieldGraph;
   if (!G) {
@@ -172,7 +257,7 @@ export default async function(component) {
 """
 
 _component = st.components.v2.component(
-    "graphshields_force_graph",
+    "graphshields_force_graph_v3",
     html=_HTML,
     css=_CSS,
     js=_JS,
@@ -191,18 +276,47 @@ def render_graph(
     payloads. Trigger callbacks are registered explicitly so the attributes are
     always present on the V2 ComponentResult.
     """
+    # Read report state directly from Streamlit. This keeps the public
+    # render_graph() call unchanged while allowing the graph card to switch
+    # while keeping the card button labeled Generate Report; the PDF downloads
+    # automatically once after report generation succeeds.
+    report_pdf_bytes = st.session_state.get("report_pdf_bytes")
+    report_filename = st.session_state.get("report_filename")
+    report_txid = st.session_state.get("report_txid")
+    report_error = st.session_state.get("report_error")
+    report_download_token = st.session_state.get("report_download_token")
+
+    print(
+        "[REPORT][GRAPH] render state | "
+        f"selected_txid={selected_txid} | report_txid={report_txid} | "
+        f"has_pdf={bool(report_pdf_bytes)} | bytes={len(report_pdf_bytes) if report_pdf_bytes else 0} | "
+        f"filename={report_filename} | token={report_download_token} | error={report_error}"
+    )
+
     result = _component(
         data={
             "graph_data": graph_data_3d,
             "height": height,
             "selected_txid": selected_txid,
+            "report_pdf_base64": (
+                base64.b64encode(report_pdf_bytes).decode("ascii")
+                if report_pdf_bytes
+                else None
+            ),
+            "report_filename": report_filename,
+            "report_txid": report_txid,
+            "report_error": report_error,
+            "report_download_token": report_download_token,
         },
+        on_node_clicked_change=lambda: None,
         on_analyze_transaction_change=lambda: None,
+        on_generate_report_change=lambda: None,
         key=key,
     )
     if result is None:
-        return {"node_clicked": None, "analyze_transaction": None}
+        return {"node_clicked": None, "analyze_transaction": None, "generate_report": None}
     return {
-        "node_clicked": None,
+        "node_clicked": getattr(result, "node_clicked", None),
         "analyze_transaction": getattr(result, "analyze_transaction", None),
+        "generate_report": getattr(result, "generate_report", None),
     }
