@@ -137,7 +137,8 @@ def _get_azure_client() -> "OpenAI":
             "AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_OPENAI_DEPLOYMENT."
         )
     base_url = endpoint.rstrip("/") + "/openai/v1/"
-    return OpenAI(api_key=api_key, base_url=base_url)
+    timeout_seconds = float(os.environ.get("AZURE_OPENAI_TIMEOUT_SECONDS", "60"))
+    return OpenAI(api_key=api_key, base_url=base_url, timeout=timeout_seconds)
 
 
 def _call_azure_openai(system_prompt: str, task_prompt: str) -> str:
@@ -156,7 +157,10 @@ def _call_azure_openai(system_prompt: str, task_prompt: str) -> str:
         raise RuntimeError("AZURE_OPENAI_DEPLOYMENT is not set in .env / config.py.")
 
     reasoning_effort = os.environ.get("AZURE_OPENAI_REASONING_EFFORT", "low")
-    max_completion_tokens = int(os.environ.get("AZURE_OPENAI_MAX_COMPLETION_TOKENS", "600"))
+    # Reasoning models spend part of this budget on internal reasoning BEFORE
+    # emitting the answer. Too small a value leaves no room for the answer and
+    # Azure returns empty content. 2000 is a safe default; tune via .env.
+    max_completion_tokens = int(os.environ.get("AZURE_OPENAI_MAX_COMPLETION_TOKENS", "2000"))
 
     client = _get_azure_client()
     response = client.chat.completions.create(
@@ -168,7 +172,36 @@ def _call_azure_openai(system_prompt: str, task_prompt: str) -> str:
         max_completion_tokens=max_completion_tokens,
         reasoning_effort=reasoning_effort,
     )
-    return response.choices[0].message.content
+
+    choice = response.choices[0]
+    content = (choice.message.content or "").strip()
+    finish_reason = getattr(choice, "finish_reason", None)
+
+    # Diagnostic line (mirrors the [PERF] prints already visible in the terminal).
+    usage = getattr(response, "usage", None)
+    completion_tokens = getattr(usage, "completion_tokens", None) if usage else None
+    reasoning_tokens = None
+    details = getattr(usage, "completion_tokens_details", None) if usage else None
+    if details is not None:
+        reasoning_tokens = getattr(details, "reasoning_tokens", None)
+    print(
+        f"[LLM] finish_reason={finish_reason} completion_tokens={completion_tokens} "
+        f"reasoning_tokens={reasoning_tokens} content_chars={len(content)} "
+        f"budget={max_completion_tokens}"
+    )
+
+    # Never silently return an empty answer. An empty/truncated response must
+    # surface as an error instead of falling through to a stale prior answer.
+    if not content:
+        raise RuntimeError(
+            f"Azure returned an empty answer (finish_reason={finish_reason}, "
+            f"completion_tokens={completion_tokens}, reasoning_tokens={reasoning_tokens}). "
+            f"For a reasoning model this usually means max_completion_tokens "
+            f"({max_completion_tokens}) is too low -- raise AZURE_OPENAI_MAX_COMPLETION_TOKENS "
+            f"in .env, and/or set AZURE_OPENAI_REASONING_EFFORT=minimal."
+        )
+
+    return content
 
 
 # ---------------------------------------------------------------------------

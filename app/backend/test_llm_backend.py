@@ -354,6 +354,83 @@ def test_generate_explanation_cache_isolated_by_session():
     llm_service.executive_summary_cache.clear()
 
 
+def test_artifact_service_matches_real_pipeline_schema():
+    print("\n[Regression] artifact_service.py reads target-scoped GNN CSVs and indexed prediction/SHAP artifacts")
+    import pandas as pd
+
+    fake_predictions = pd.DataFrame({
+        "txId": [339094191, 111],
+        "pred": [1, 0],
+        "prob": [0.87, 0.12],
+        "true_label": [1, 0],
+    })
+    fake_shap = pd.DataFrame({
+        "txId": [339094191],
+        "top_positive_factors": ['[{"category":"Transaction Profile","feature":"V6","impact":"+1.17"}]'],
+        "top_negative_factors": ['[{"category":"Network Context","feature":"V22","impact":"-0.45"}]'],
+    })
+    fake_tx_ids = pd.DataFrame({"node_idx": [1, 2, 3], "txId": [339094191, 111, 222]})
+    fake_nodes = pd.DataFrame({
+        "explained_target_node_idx": [1, 1],
+        "explained_target_txId": [339094191, 339094191],
+        "node_idx": [2, 3],
+        "txId": [111, 222],
+        "node_importance": [0.62, 0.35],
+    })
+    fake_edges = pd.DataFrame({
+        "explained_target_node_idx": [1, 1],
+        "explained_target_txId": [339094191, 339094191],
+        "source_node_idx": [2, 2],
+        "target_node_idx": [1, 3],
+        "source_txId": [111, 111],
+        "target_txId": [339094191, 222],
+        "edge_importance": [0.5, 0.4],
+    })
+
+    artifact_service.clear_cache()
+
+    def fake_read_csv(path, *args, **kwargs):
+        path = str(path)
+        if "hybrid_predictions" in path:
+            return fake_predictions
+        if "transaction_explanations" in path:
+            return fake_shap
+        if "transaction_ids" in path:
+            return fake_tx_ids
+        if "important_nodes" in path:
+            return fake_nodes
+        if "important_edges" in path:
+            return fake_edges
+        raise FileNotFoundError(path)
+
+    with patch("os.path.exists", return_value=True), \
+         patch("pandas.read_csv", side_effect=fake_read_csv), \
+         patch.object(artifact_service, "get_feature_categories", return_value={}):
+
+        pred_row = artifact_service.get_prediction_row("339094191")
+        check("prediction normalizes pred=1 to 'suspicious'", pred_row["prediction"] == "suspicious")
+        check("true_label normalizes 1 to 'illicit'", pred_row["true_label"] == "illicit")
+        check("risk_score reads from 'prob' column", pred_row["risk_score"] == 0.87)
+
+        gnn_row = artifact_service.get_gnn_importance_row("339094191")
+        check("gnn_importance summarizes strongest target-scoped neighbor importance", gnn_row["gnn_importance"] == 0.62)
+
+        shap_row = artifact_service.get_shap_row("339094191")
+        check("positive_shap parsed from JSON factors", "V6" in shap_row["positive_shap"])
+        check("negative_shap parsed from JSON factors", "V22" in shap_row["negative_shap"])
+
+        neighbors = artifact_service.get_important_neighbors("339094191")
+        check("neighbors filtered by explained_target_txId", len(neighbors) == 2 and neighbors[0]["txId"] == "111")
+
+        edges = artifact_service.get_important_edges("339094191")
+        check("all target-scoped edges are preserved, including non-incident explanatory edges", len(edges) == 2)
+
+        check("node_exists checks against transaction_ids.csv node_idx", artifact_service.node_exists(1) is True)
+        check("node_exists returns False for unknown node", artifact_service.node_exists(999) is False)
+
+    artifact_service.clear_cache()
+
+
 def test_generate_explanation_blocks_invalid_request_before_azure():
     print("\n[LLM Service] invalid request is rejected before Azure is ever called")
     ctx = make_context(transaction_id="does_not_exist", selected_node=SelectedNode(1, "does_not_exist"))
@@ -386,6 +463,7 @@ if __name__ == "__main__":
     test_generate_explanation_without_session_id_skips_cache()
     test_generate_explanation_cache_isolated_by_transaction()
     test_generate_explanation_cache_isolated_by_session()
+    test_artifact_service_matches_real_pipeline_schema()
     test_generate_explanation_blocks_invalid_request_before_azure()
 
     print(f"\n{'='*50}")

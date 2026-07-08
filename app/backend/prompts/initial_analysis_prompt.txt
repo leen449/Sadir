@@ -1,4 +1,4 @@
-Task: Produce the initial investigation analysis for the selected transaction.
+Task: Produce a concise initial investigation overview for the selected transaction.
 
 Use the supplied TransactionContext only.
 
@@ -13,18 +13,23 @@ Transaction evidence:
 - Important Edges: {important_edges}
 - Feature Categories: {feature_categories}
 
-Write a concise professional analysis in approximately 2-3 short paragraphs.
+Write a concise professional overview in 2-3 short paragraphs.
 
-The analysis must:
+The Initial Analysis must:
 1. State the model prediction and risk score.
-2. Explain the strongest positive SHAP evidence at a high level.
-3. Explain the network influence using only the supplied GNN and neighbor evidence.
-4. Provide an overall cautious interpretation.
-5. Mention the most important limitations, including that the available evidence is anonymized and does not establish real-world intent or confirm money laundering.
-6. End by stating that the transaction requires investigator review rather than presenting the model output as a final decision.
+2. Summarize at a high level that transaction-level and/or network-level evidence contributed to the model output when supported by the supplied evidence.
+3. Give a cautious overall interpretation suitable for an investigator opening the case.
+4. Mention that the available evidence is anonymized and does not establish real-world intent or confirm money laundering.
+5. End by stating that the transaction requires investigator review rather than presenting the model output as a final decision.
+
+Keep this overview intentionally high-level because detailed evidence is handled by the three predefined investigation questions.
 
 Do not:
-- list every feature mechanically,
+- rank or list individual V-features,
+- quote detailed SHAP values,
+- list individual neighbor transaction IDs,
+- quote detailed edge values,
+- mechanically repeat all supplied evidence,
 - invent feature meanings,
 - infer identities,
 - state that a crime occurred,
