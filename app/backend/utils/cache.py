@@ -44,7 +44,7 @@ class ArtifactCache:
 
     def __init__(self) -> None:
         self._store: Dict[str, Any] = {}
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
     def get_or_load(self, key: str, loader_fn: Callable[[], Any]) -> Any:
         """Return the cached value for `key`, computing and storing it via
