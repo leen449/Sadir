@@ -13,8 +13,8 @@ _HTML = """
 <div id="graph"></div>
 <div id="legend">
   <div><span style="background:#ff4d4d"></span>Suspicious target</div>
-  <div><span style="background:#ffa64d"></span>Important neighbor</div>
-  <div><span style="background:#4dbd74"></span>Normal / licit comparison</div>
+  <div><span style="background:#f6cfc7"></span>Important neighbor</div>
+  <div><span style="background:#b9d7e3"></span>Normal / licit comparison</div>
   <div class="legend-help">Click node · Drag to rotate · Scroll to zoom</div>
 </div>
 <div id="panel"></div>
@@ -22,38 +22,109 @@ _HTML = """
 """
 
 _CSS = """
-html,body{margin:0;padding:0;background:#0b0e14;overflow:hidden;font-family:-apple-system,Segoe UI,Roboto,sans-serif}
-#graph-shell{position:relative;width:100%;height:100%;min-height:420px;overflow:hidden;background:#0b0e14}
-#graph{width:100%;height:100%}
-#panel{position:absolute;top:16px;right:16px;width:clamp(290px,28vw,370px);max-height:calc(100% - 32px);overflow-y:auto;
-       background:rgba(20,24,34,.97);color:#e8eaf0;border:1px solid #2a3040;border-radius:12px;
-       padding:16px 18px;box-sizing:border-box;box-shadow:0 8px 24px rgba(0,0,0,.45);
-       font-size:12px;line-height:1.5;display:none;z-index:20}
-#panel h3{margin:0 0 6px;font-size:14px;padding-right:20px}
-.report-error{margin-top:10px;padding:9px 10px;border-radius:7px;background:#3a1f1f;border:1px solid #7a3a3a;color:#ffb0b0;font-size:11px}
-.lbl{color:#8c93a6;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-top:9px}
-.val{color:#e8eaf0;word-break:break-word}
-.raw{color:#9299aa;font-size:10px;font-family:monospace;margin-top:2px;word-break:break-word}
-.rh{color:#ff6b6b;font-weight:600}.rl{color:#69db7c;font-weight:600}
-#pc{position:absolute;top:10px;right:12px;cursor:pointer;color:#8c93a6;font-size:15px;background:none;border:none}
-#pc:hover{color:#e8eaf0}
-.actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #2a3040}
-.action-btn{min-height:40px;padding:8px 10px;border-radius:7px;border:1px solid #3a4357;background:#232938;color:#f3f4f6;cursor:pointer;font-weight:600;font-size:11px;white-space:normal}
-.action-btn:hover:not(:disabled){background:#30384a;border-color:#59647d}
-.action-btn.primary{background:#6d4aff;border-color:#7e64ff;color:#fff}
-.action-btn.primary:hover{background:#7a5cff}
-.action-btn:disabled{opacity:.45;cursor:not-allowed}
-#legend{position:absolute;top:50px;left:16px;max-width:min(300px,calc(100% - 32px));box-sizing:border-box;color:#c4c9d4;font-size:11px;background:rgba(20,24,34,.88);padding:9px 13px;border-radius:8px;z-index:10;pointer-events:none}
-#legend span{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-.legend-help{margin-top:5px;color:#8c93a6;font-size:10px}
-@media (max-width:900px){
-  #legend{top:70px;left:10px;font-size:10px;padding:7px 9px}
-  .legend-help{display:none}
-  #panel{top:10px;right:10px;width:min(330px,calc(100% - 20px));max-height:calc(100% - 20px);padding:14px}
-  .actions{grid-template-columns:1fr}
+:root{
+  --card-1:#07506a;
+  --card-2:#124f65;
+  --card-3:#0d4054;
+  --card-4:#083240;
+  --cream:#ffffffdb;
 }
-@media (max-width:560px){
-  #panel{left:10px;right:10px;width:auto}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+html,body,#graph-shell{background:#f5f8fa}
+body.gs-dark, body.gs-dark #graph-shell{background:#0a3142}
+#graph-shell{
+  position:relative;width:100%;height:100%;min-height:420px;overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 18%,rgba(7,80,106,.055),transparent 24%),
+    radial-gradient(circle at 82% 12%,rgba(18,79,101,.045),transparent 22%),
+    linear-gradient(135deg,#f8fbfc 0%,#f2f7f9 55%,#edf4f6 100%);
+}
+body.gs-dark #graph-shell{
+  background:
+    radial-gradient(circle at 20% 18%,rgba(18,79,101,.14),transparent 25%),
+    radial-gradient(circle at 78% 12%,rgba(7,80,106,.10),transparent 23%),
+    linear-gradient(135deg,#081f2b 0%,#0a3142 54%,#0c3a4d 100%);
+}
+#graph-shell::before,#graph-shell::after{
+  content:"";position:absolute;left:-8%;right:-8%;pointer-events:none;z-index:1;
+  border-radius:50%;filter:blur(2px)
+}
+#graph-shell::before{
+  height:30%;bottom:-18%;opacity:.24;
+  background:radial-gradient(75% 140% at 22% 0%,rgba(7,80,106,.08),transparent 60%),radial-gradient(70% 130% at 72% 0%,rgba(18,79,101,.065),transparent 62%);
+}
+#graph-shell::after{
+  height:20%;bottom:-12%;opacity:.16;
+  background:radial-gradient(62% 120% at 48% 0%,rgba(7,80,106,.08),transparent 64%);
+}
+body.gs-dark #graph-shell::before{opacity:.16;background:radial-gradient(75% 140% at 22% 0%,rgba(255,255,255,.045),transparent 60%),radial-gradient(70% 130% at 72% 0%,rgba(255,255,255,.035),transparent 62%)}
+body.gs-dark #graph-shell::after{opacity:.10;background:radial-gradient(62% 120% at 48% 0%,rgba(255,255,255,.04),transparent 64%)}
+#graph{width:100%;height:100%;position:relative;z-index:2}
+#panel{
+  position:absolute;top:18px;right:18px;width:clamp(320px,30vw,430px);max-height:calc(100% - 36px);overflow-y:auto;
+  background:linear-gradient(160deg,rgba(18,79,101,.97) 0%,rgba(13,64,84,.98) 56%,rgba(8,50,64,.99) 100%);
+  color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:20px;box-sizing:border-box;
+  box-shadow:0 24px 58px rgba(3,31,45,.28);font-size:12px;line-height:1.5;display:none;z-index:20;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)
+}
+#panel::before{content:"";position:absolute;width:124px;height:124px;border-radius:50%;right:-42px;top:-42px;background:rgba(255,255,255,.10);pointer-events:none}
+#panel::-webkit-scrollbar{width:7px}#panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.20);border-radius:999px}
+.panel-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;position:relative;z-index:2}
+.panel-title-wrap{min-width:0}
+#panel h3{margin:0;font-size:28px;line-height:1.1;color:#fff;word-break:break-word}
+.risk-pill{display:inline-flex;align-items:center;justify-content:center;padding:10px 15px;border-radius:999px;background:var(--cream);color:var(--card-4);font-weight:800;font-size:12px;white-space:nowrap;border:1px solid rgba(255,255,255,.28);box-shadow:0 10px 24px rgba(3,31,45,.14)}
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;position:relative;z-index:2}
+.info-box{min-width:0;border-radius:21px;padding:14px 15px;background:rgba(8,50,64,.46);border:1px solid rgba(255,255,255,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.info-box.wide{grid-column:1/-1}
+.lbl{color:rgba(255,255,255,.72);font-size:10px;text-transform:uppercase;letter-spacing:.045em;margin:0 0 6px;font-weight:700}
+.val{color:#fff;word-break:break-word;font-size:13px;font-weight:700;line-height:1.4}
+.raw{color:rgba(255,255,255,.63);font-size:9px;font-family:monospace;margin-top:5px;word-break:break-word;line-height:1.4}
+.rh{color:#fff;font-weight:800}.rl{color:#fff;font-weight:800}
+#pc{position:absolute;top:14px;right:14px;left:auto;cursor:pointer;color:rgba(255,255,255,.92);font-size:17px;background:rgba(8,50,64,.55);border:1px solid rgba(255,255,255,.22);width:34px;height:34px;border-radius:50%;z-index:25;display:flex;align-items:center;justify-content:center;line-height:1;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 6px 16px rgba(0,0,0,.28)}.panel-top{padding-right:44px}
+#pc:hover{color:#fff;background:rgba(255,255,255,.12)}
+.actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:15px;position:relative;z-index:2}
+/* Analyze / Report buttons: legible in every state (normal, hover, disabled) */
+.action-btn{min-height:52px;padding:11px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff !important;-webkit-text-fill-color:#fff !important;cursor:pointer;font-weight:700;font-size:12px;white-space:normal;transition:background .18s ease,transform .18s ease;opacity:1 !important}
+.action-btn:hover:not(:disabled){transform:translateY(-1px);background:rgba(255,255,255,.14) !important;color:#fff !important;-webkit-text-fill-color:#fff !important}
+.action-btn:disabled{cursor:not-allowed;transform:none;background:rgba(255,255,255,.10) !important;color:#eaf3f7 !important;-webkit-text-fill-color:#eaf3f7 !important;border-color:rgba(255,255,255,.14) !important;opacity:1 !important}
+/* PRIMARY (cream Analyze button) -- ALWAYS dark text on cream bg, EVERY state */
+.action-btn.primary,
+.action-btn.primary:hover,
+.action-btn.primary:hover:not(:disabled),
+.action-btn.primary:focus,
+.action-btn.primary:active,
+.action-btn.primary:disabled{background:var(--cream) !important;border-color:rgba(255,255,255,.28) !important;color:#083240 !important;-webkit-text-fill-color:#083240 !important;box-shadow:0 12px 24px rgba(3,31,45,.15) !important;opacity:1 !important}
+.action-btn.primary:hover:not(:disabled){background:#ffffff !important;transform:translateY(-1px)}
+.action-btn.primary:disabled{background:#e6edf1 !important}
+.report-error{margin-top:10px;padding:10px 11px;border-radius:12px;background:rgba(78,24,24,.72);border:1px solid rgba(255,176,176,.25);color:#ffd0d0;font-size:10px}
+#legend{
+  position:absolute !important;top:40px !important;left:18px !important;bottom:auto !important;right:auto !important;width:min(255px,calc(100% - 36px));box-sizing:border-box;
+  color:var(--cream);font-size:11px;background:rgba(8,50,64,.58);padding:15px 16px;border-radius:22px;z-index:10;pointer-events:none;
+  border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 40px rgba(3,31,45,.20);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)
+}
+body.gs-light #legend{background:rgba(7,80,106,.72)}
+#legend::before{content:"Legend";display:block;color:#fff;font-size:17px;font-weight:800;margin-bottom:10px;text-align:left}
+#legend>div{display:flex;align-items:center;gap:7px;margin:7px 0;font-weight:700}
+#legend span{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:0;flex:0 0 auto;box-shadow:0 0 0 2px rgba(255,255,255,.08)}
+.legend-help{margin-top:8px;color:rgba(255,255,255,.65);font-size:9px;font-weight:500!important}
+/* rotate/zoom/pan hint: force a readable frosted pill on both themes */
+#graph .scene-nav-info,.scene-nav-info{opacity:1 !important;visibility:visible !important;padding:6px 12px !important;border-radius:12px !important;font-weight:600 !important;pointer-events:none !important;backdrop-filter:blur(8px) !important;-webkit-backdrop-filter:blur(8px) !important;text-shadow:none !important}
+body.gs-light #graph .scene-nav-info,body.gs-light .scene-nav-info{color:#083240 !important;background:rgba(255,255,255,.72) !important;border:1px solid rgba(6,49,66,.10) !important}
+body.gs-dark #graph .scene-nav-info,body.gs-dark .scene-nav-info,#graph .scene-nav-info{color:#ffffff !important;background:rgba(8,50,64,.72) !important;border:1px solid rgba(255,255,255,.14) !important;text-shadow:0 1px 2px rgba(0,0,0,.35) !important}
+@media (max-width:900px){
+  #legend{top:10px;left:10px;width:min(220px,calc(100% - 20px));font-size:10px;padding:11px 12px;border-radius:18px}
+  #legend::before{font-size:15px;margin-bottom:7px}
+  .legend-help{display:none}
+  #panel{top:10px;right:10px;width:min(390px,calc(100% - 20px));max-height:calc(100% - 20px);padding:17px;border-radius:25px}
+  #panel h3{font-size:23px}.risk-pill{font-size:11px;padding:8px 12px}
+}
+@media (max-width:620px){
+  #panel{left:8px;right:8px;width:auto;top:8px;max-height:calc(100% - 16px);padding:15px;border-radius:22px}
+  .panel-top{flex-direction:column;padding-left:38px}
+  .info-grid{grid-template-columns:1fr;gap:9px}.info-box.wide{grid-column:auto}
+  .actions{grid-template-columns:1fr}.action-btn{min-height:48px}
+  #legend{width:min(205px,calc(100% - 16px));left:8px;top:8px}
 }
 """
 
@@ -111,6 +182,29 @@ export default async function(component) {
   const panel = parentElement.querySelector("#panel");
   graphEl.style.height = height + "px";
 
+  function syncTheme(){
+    let isLight = true;
+    try { isLight = window.parent.document.body.classList.contains("gs-light"); } catch (e) {}
+    document.body.classList.toggle("gs-light", isLight);
+    document.body.classList.toggle("gs-dark", !isLight);
+
+    // 3d-force-graph injects its own "Left-click: rotate / Mouse-wheel: zoom / Right-click: pan"
+    // hint directly into the DOM with a fixed text color. That color isn't theme-aware, so it
+    // becomes unreadable against our dark background. Find it by its known text and recolor it
+    // to match the active theme every time this runs.
+    const navInfo = parentElement.querySelector(".scene-nav-info")
+      || Array.from(graphEl.querySelectorAll("div")).find(el => (el.textContent || "").includes("Left-click"));
+    if (navInfo) {
+      const c = isLight ? "#083240" : "#ffffff";
+      navInfo.style.setProperty("color", c, "important");
+      navInfo.querySelectorAll("*").forEach(el => el.style.setProperty("color", c, "important"));
+    }
+
+    return isLight;
+  }
+  const isLightTheme = syncTheme();
+  setInterval(syncTheme, 700);
+
   let hoverTooltip = parentElement.querySelector("#graph-hover-tooltip");
 
   if (!hoverTooltip) {
@@ -163,20 +257,26 @@ export default async function(component) {
     panel.style.display="block";
     const icon=n.group==="target"?"🎯":n.group==="neighbor"?"🔗":"✅";
     const label=n.group==="target"?"Target":(n.group==="neighbor"?"Neighbor":"Normal");
+    const riskText = n.predicted_risk===null || n.predicted_risk===undefined
+      ? "Risk n/a"
+      : `${Number(n.predicted_risk)>=0.5?"High Risk":"Low Risk"} • ${(Number(n.predicted_risk)*100).toFixed(1)}%`;
     panel.innerHTML=`
       <button id="pc" aria-label="Close transaction details">✕</button>
-      <h3>${icon} ${label} Transaction</h3>
-      <div class="lbl">Transaction ID</div><div class="val">${escapeHtml(n.txId)}</div>
-      <div class="lbl">Prediction</div><div class="val">${escapeHtml(n.prediction || "n/a")}</div>
-      <div class="lbl">True Label</div><div class="val">${escapeHtml(n.true_label || "n/a")}</div>
-      <div class="lbl">Risk Score</div><div class="val">${fmtRisk(n.predicted_risk)}</div>
-      <div class="lbl">GNN Importance</div><div class="val">${Number(n.gnn_importance || 0).toFixed(4)}</div>
-      <div class="lbl">Positive SHAP Features</div><div class="val">${escapeHtml(n.shap_increasing_cat || "n/a")}</div>
-      <div class="raw">${escapeHtml(n.shap_increasing_raw || "")}</div>
-      <div class="lbl">Negative SHAP Features</div><div class="val">${escapeHtml(n.shap_decreasing_cat || "n/a")}</div>
-      <div class="raw">${escapeHtml(n.shap_decreasing_raw || "")}</div>
-      <div class="lbl">Transaction Profile Factors</div><div class="val">${listOrNA(n.transaction_profile_factors)}</div>
-      <div class="lbl">Network Context Factors</div><div class="val">${listOrNA(n.network_context_factors)}</div>
+      <div class="panel-top">
+        <div class="panel-title-wrap"><h3>${icon} ${escapeHtml(n.txId)}</h3></div>
+        <div class="risk-pill">${escapeHtml(riskText)}</div>
+      </div>
+      <div class="info-grid">
+        <div class="info-box"><div class="lbl">Transaction Type</div><div class="val">${escapeHtml(label)}</div></div>
+        <div class="info-box"><div class="lbl">Prediction</div><div class="val">${escapeHtml(n.prediction || "n/a")}</div></div>
+        <div class="info-box"><div class="lbl">True Label</div><div class="val">${escapeHtml(n.true_label || "n/a")}</div></div>
+        <div class="info-box"><div class="lbl">Risk Score</div><div class="val">${fmtRisk(n.predicted_risk)}</div></div>
+        <div class="info-box"><div class="lbl">GNN Importance</div><div class="val">${Number(n.gnn_importance || 0).toFixed(4)}</div></div>
+        <div class="info-box"><div class="lbl">Positive SHAP Features</div><div class="val">${escapeHtml(n.shap_increasing_cat || "n/a")}</div><div class="raw">${escapeHtml(n.shap_increasing_raw || "")}</div></div>
+        <div class="info-box wide"><div class="lbl">Negative SHAP Features</div><div class="val">${escapeHtml(n.shap_decreasing_cat || "n/a")}</div><div class="raw">${escapeHtml(n.shap_decreasing_raw || "")}</div></div>
+        <div class="info-box"><div class="lbl">Transaction Profile Factors</div><div class="val">${listOrNA(n.transaction_profile_factors)}</div></div>
+        <div class="info-box"><div class="lbl">Network Context Factors</div><div class="val">${listOrNA(n.network_context_factors)}</div></div>
+      </div>
       <div class="actions">
         <button id="analyze-btn" class="action-btn primary">Analyze Transaction</button>
         <button id="report-btn" class="action-btn">Generate Report</button>
@@ -331,9 +431,9 @@ export default async function(component) {
   let G = parentElement.__graphShieldGraph;
   if (!G) {
     G = ForceGraph3D()(graphEl)
-      .backgroundColor("#0b0e14")
+      .backgroundColor(isLightTheme ? "#f3f7f9" : "#0a3142")
       .nodeLabel(() => "")
-      .nodeColor(n=>n.group==="target"?"#ff4d4d":n.group==="neighbor"?"#ffa64d":"#4dbd74")
+      .nodeColor(n=>n.group==="target"?"#ff4d4d":n.group==="neighbor"?"#f6cfc7":"#b9d7e3")
       .nodeVal(n=>n.group==="target"?14:3+9*Number(n.gnn_importance || 0))
       .linkWidth(l=>0.5+5*Number(l.importance || 0))
       .linkColor(()=>"rgba(255,255,255,0.25)")
@@ -345,6 +445,7 @@ export default async function(component) {
       .onEngineStop(() => { parentElement.__graphShieldSettled = true; });
     parentElement.__graphShieldGraph = G;
   }
+  G.backgroundColor(isLightTheme ? "#f3f7f9" : "#0a3142");
 
   // graphData(...) is NOT a passive setter -- calling it tells 3d-force-graph
   // the data changed, which reheats/restarts the force simulation, even if the

@@ -12,112 +12,70 @@ from services import firebase_services
 
 _HISTORY_CSS = """
 <style>
-.report-history-toolbar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin: 0 0 12px 0;
-}
+.report-history-toolbar { display:flex; justify-content:flex-end; align-items:center; margin:0 0 12px 0; }
+[class*="st-key-report_history_date_wrap"] { max-width:310px; margin-left:auto; }
 
-/* Keep the date widget compact on the right without an extra popover wrapper. */
-[class*="st-key-report_history_date_wrap"] {
-    max-width: 310px;
-    margin-left: auto;
-}
-
+/* DARK default: #124f65 shade */
 .report-history-card {
     position: relative;
     width: 100%;
     box-sizing: border-box;
-    background: #171b24;
-    border: 1px solid #2b3140;
-    border-radius: 12px;
-    padding: 18px 64px 16px 18px;
-    margin: 12px 0;
+    background: #124f65;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 16px;
+    padding: 18px 64px 16px 20px;
+    margin: 14px 0;
     overflow: visible;
+    box-shadow: 0 8px 22px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.05);
+    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
 }
-
-.report-history-id {
-    font-size: 16px;
-    font-weight: 700;
-    color: #f5f7fb;
-    margin: 0 0 8px 0;
+.report-history-card:hover {
+    background: #155972;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.06);
 }
-
-.report-history-meta {
-    color: #aab2c0;
-    font-size: 13px;
-    line-height: 1.7;
-    margin: 0;
-}
-
+.report-history-id { font-size:16px; font-weight:800; color:#fff; margin:0 0 8px 0; letter-spacing:.1px; }
+.report-history-meta { color:rgba(255,255,255,.78); font-size:13px; line-height:1.7; margin:0; }
+.report-history-meta b { color:#fff; font-weight:700; }
 .report-history-status {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 999px;
-    background: #262d3b;
-    border: 1px solid #3a4356;
-    color: #d6dbea;
-    font-size: 12px;
-    margin-top: 6px;
+    display:inline-block; padding:3px 10px; border-radius:999px;
+    background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16);
+    color:#eaf3f7; font-size:12px; font-weight:600; margin-top:6px;
 }
 
-/* Native anchored menu: stays attached to its card and scrolls with it. */
-.report-menu {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 5;
-}
-
+.report-menu { position:absolute; top:14px; right:14px; z-index:5; }
 .report-menu summary {
-    list-style: none;
-    cursor: pointer;
-    color: #aab2c0;
-    font-size: 22px;
-    line-height: 1;
-    padding: 2px 5px;
-    border-radius: 6px;
-    user-select: none;
+    list-style:none; cursor:pointer; color:rgba(255,255,255,.75);
+    font-size:22px; line-height:1; padding:2px 6px; border-radius:6px; user-select:none;
 }
-
-.report-menu summary::-webkit-details-marker {
-    display: none;
-}
-
-.report-menu summary:hover {
-    color: #f5f7fb;
-    background: #232936;
-}
-
+.report-menu summary::-webkit-details-marker { display:none; }
+.report-menu summary:hover { color:#fff; background: rgba(255,255,255,.12); }
 .report-menu-panel {
-    position: absolute;
-    top: 30px;
-    right: 0;
-    min-width: 145px;
-    padding: 6px;
-    border-radius: 8px;
-    border: 1px solid #2b3140;
-    background: #11151d;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-    z-index: 20;
+    position:absolute; top:30px; right:0; min-width:155px; padding:6px;
+    border-radius:10px; border:1px solid rgba(255,255,255,.14);
+    background:#0e4257; box-shadow:0 10px 26px rgba(0,0,0,.35); z-index:20;
 }
-
 .report-download-link {
-    display: block;
-    white-space: nowrap;
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: #e8ecf5 !important;
-    text-decoration: none !important;
-    font-size: 13px;
-    text-align: left;
+    display:block; white-space:nowrap; padding:8px 12px; border-radius:6px;
+    color:#eaf3f7 !important; text-decoration:none !important;
+    font-size:13px; text-align:left;
 }
+.report-download-link:hover { background: rgba(255,255,255,.08); color:#fff !important; }
 
-.report-download-link:hover {
-    background: #232936;
-    color: #ffffff !important;
+/* LIGHT mode (matches the mockup) */
+body.gs-light .report-history-card {
+    background:#f5f9fb; border:1px solid #dae5ec; box-shadow:0 2px 8px rgba(6,49,66,.05);
 }
+body.gs-light .report-history-card:hover { background:#eef4f7; box-shadow:0 6px 16px rgba(6,49,66,.08); }
+body.gs-light .report-history-id { color:#0b3a4c; }
+body.gs-light .report-history-meta { color:#4a6373; }
+body.gs-light .report-history-meta b { color:#0b3a4c; }
+body.gs-light .report-history-status { background:#e5eef3; border:1px solid #d0dde4; color:#0b3a4c; }
+body.gs-light .report-menu summary { color:#4a6373; }
+body.gs-light .report-menu summary:hover { color:#0b3a4c; background:#e5eef3; }
+body.gs-light .report-menu-panel { background:#fff; border:1px solid #dae5ec; box-shadow:0 10px 26px rgba(6,49,66,.10); }
+body.gs-light .report-download-link { color:#0b3a4c !important; }
+body.gs-light .report-download-link:hover { background:#eef4f7; color:#0b3a4c !important; }
 </style>
 """
 
@@ -188,6 +146,14 @@ def _render_card(report: dict, index: int) -> None:
     )
 
 
+def _report_date(report: dict) -> date | None:
+    """Extract the calendar date from a report's generated_at timestamp."""
+    ts = report.get("generated_at")
+    if isinstance(ts, datetime):
+        return ts.astimezone().date()
+    return None
+
+
 def render_report_history(*, storage_error: str | None = None) -> None:
     """Render report history below the Investigation Workspace."""
     st.markdown(_HISTORY_CSS, unsafe_allow_html=True)
@@ -196,32 +162,11 @@ def render_report_history(*, storage_error: str | None = None) -> None:
     if storage_error:
         st.warning(storage_error)
 
-    # Direct date input: no popover wrapper, so only Streamlit's calendar opens.
-    with st.container(key="report_history_date_wrap"):
-        date_range = st.date_input(
-            "Date Filter",
-            value=(),
-            key="report_history_date_filter",
-            label_visibility="collapsed",
-        )
-
-    start_date: date | None = None
-    end_date: date | None = None
-
-    if isinstance(date_range, tuple):
-        if len(date_range) >= 1:
-            start_date = date_range[0]
-        if len(date_range) >= 2:
-            end_date = date_range[1]
-        elif len(date_range) == 1:
-            end_date = date_range[0]
-
+    # Load all reports first so we know which dates actually have data. The
+    # filter below is a dropdown restricted to those dates -- users cannot pick
+    # a day that has no reports.
     try:
-        reports = firebase_services.get_reports(
-            limit=100,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        all_reports = firebase_services.get_reports(limit=100)
     except Exception as exc:
         st.error(f"Could not load report history: {exc}")
         print(
@@ -230,9 +175,39 @@ def render_report_history(*, storage_error: str | None = None) -> None:
         )
         return
 
+    if not all_reports:
+        st.info("No reports are available yet.")
+        return
+
+    available_dates = sorted(
+        {d for d in (_report_date(r) for r in all_reports) if d is not None},
+        reverse=True,
+    )
+
+    ALL_LABEL = "All Reports"
+    options = [ALL_LABEL] + [d.strftime("%d %b %Y") for d in available_dates]
+
+    with st.container(key="report_history_date_wrap"):
+        selected_label = st.selectbox(
+            "Date Filter",
+            options=options,
+            index=0,
+            key="report_history_date_filter",
+            label_visibility="collapsed",
+        )
+
+    if selected_label == ALL_LABEL:
+        reports = all_reports
+    else:
+        chosen = next(
+            (d for d in available_dates if d.strftime("%d %b %Y") == selected_label),
+            None,
+        )
+        reports = [r for r in all_reports if _report_date(r) == chosen] if chosen else []
+
     if not reports:
-        st.info("No reports are available for the selected date range.")
+        st.info("No reports are available for the selected date.")
         return
 
     for index, report in enumerate(reports):
-        _render_card(report, index)
+        _render_card(report, index)  
