@@ -142,6 +142,8 @@ GraphShield/
 │   │
 │   ├── main.py
 │   │
+│   ├── assets/
+│   │
 │   ├── pages/
 │   │    ├── dashboard.py             # Investigation workspace, graph, LLM interactions, report generation and history
 │   │    ├── transaction_analysis.py  # Transaction analysis page
@@ -167,7 +169,7 @@ GraphShield/
 │        │    └── firebase_services.py    # Firebase initialization, report storage, metadata, listing, and retrieval
 │        │
 │        ├── security/
-│        │    └── validation.py            # Validates LLM requests
+│        │    └── validation.py          # Validates LLM requests
 │        │
 │        ├── prompts/
 │        │    ├── system_prompt.txt
@@ -177,7 +179,7 @@ GraphShield/
 │        │    └── question_3_negative_shap.txt
 │        │
 │        ├── utils/
-│        │    └── cache.py                 # Artifact and executive-summary caches
+│        │    └── cache.py               # Artifact and executive-summary caches
 │        │
 │        └── test_llm_backend.py
 │
