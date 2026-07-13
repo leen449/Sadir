@@ -32,7 +32,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from services import artifact_service as A
+from app.backend.services import artifact_service as A
 
 DECISION_THRESHOLD = 0.8
 
@@ -333,7 +333,7 @@ def build_report_data(transaction_id: str) -> ReportData:
 def get_executive_summary(session_id: str, transaction_id: str, node_index: Any = None) -> str:
     """Reuse the cached initial analysis; generate + cache on a miss so a report
     is obtainable even if Analyze was never clicked."""
-    from utils.cache import executive_summary_cache
+    from app.backend.utils.cache import executive_summary_cache
 
     cached = executive_summary_cache.get(session_id, str(transaction_id))
     if cached:
@@ -341,8 +341,8 @@ def get_executive_summary(session_id: str, transaction_id: str, node_index: Any 
 
     # On-demand generation (adds LLM latency). generate_explanation writes the
     # result back into executive_summary_cache itself.
-    from services.llm_service import generate_explanation
-    from services.transaction_service import SelectedNode, build_context
+    from app.backend.services.llm_service import generate_explanation
+    from app.backend.services.transaction_service import SelectedNode, build_context
 
     context = build_context(
         str(transaction_id),

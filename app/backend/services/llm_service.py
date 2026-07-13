@@ -19,10 +19,10 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from config import settings
-from security.validation import validate_request, ValidationError
-from services.transaction_service import TransactionContext
-from utils.cache import executive_summary_cache
+from app.backend.config import settings
+from app.backend.security.validation import validate_request, ValidationError
+from app.backend.services.transaction_service import TransactionContext
+from app.backend.utils.cache import executive_summary_cache
 
 logger = logging.getLogger(__name__)
 

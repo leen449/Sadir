@@ -28,7 +28,7 @@ Safety / isolation
 
 Usage (add ONE line to pages/dashboard.py, e.g. right after load_all()):
 
-    from services.prewarm import start_prewarm
+    from app.backend.services.prewarm import start_prewarm
     start_prewarm()
 """
 
@@ -73,7 +73,7 @@ def _warm_artifact_cache() -> None:
     file (the load happens before the id filter), which is the point.
     """
     started = time.perf_counter()
-    from services import artifact_service as a
+    from app.backend.services import artifact_service as a
 
     # Each call loads+caches its file even though "0" matches nothing.
     a.get_feature_categories()          # feature_categories.json
@@ -94,8 +94,8 @@ def _warm_azure() -> None:
     established and the deployment is warm.
     """
     started = time.perf_counter()
-    from config import settings
-    from services.llm_service import _get_azure_client
+    from app.backend.config import settings
+    from app.backend.services.llm_service import _get_azure_client
 
     deployment = getattr(settings, "AZURE_OPENAI_DEPLOYMENT", None)
     if not deployment:

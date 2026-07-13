@@ -1,8 +1,9 @@
 import os, json
+from functools import lru_cache          # ← CHANGED: standard-library cache, replaces st.cache_resource
 import pandas as pd
 import numpy as np
 import torch
-import streamlit as st
+# ← REMOVED: import streamlit as st
 
 # ── Paths (relative to repo root, adjust if needed) ──────────────────────────
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,12 +18,15 @@ PATHS = {
     "final_metrics":           os.path.join(ROOT, "results/metrics/final_metrics.json"),
 }
 
-@st.cache_resource(show_spinner=False)
+
+@lru_cache(maxsize=1)                     # ← CHANGED: runs once, caches result (same idea as st.cache_resource)
 def load_all():
     missing = [k for k, p in PATHS.items() if not os.path.exists(p)]
     if missing:
-        st.error(f"Missing files: {missing}. Check your results/ and data/ folders.")
-        st.stop()
+        # ← CHANGED: raise a normal exception instead of st.error(...) + st.stop()
+        raise FileNotFoundError(
+            f"Missing files: {missing}. Check your results/ and data/ folders."
+        )
 
     graph  = torch.load(PATHS["pyg_graph"], map_location="cpu", weights_only=False)
     tx_df  = pd.read_csv(PATHS["transaction_ids"])

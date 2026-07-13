@@ -49,7 +49,7 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
-from utils.cache import artifact_cache
+from app.backend.utils.cache import artifact_cache
 
 
 # ---------------------------------------------------------------------------

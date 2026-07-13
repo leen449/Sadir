@@ -1,0 +1,44 @@
+/* Verify gate — transparent-until-verified overlay, ported from style.css.
+   The app blurs behind a frosted overlay until the correct number + OTP pass. */
+
+.app-locked { filter: blur(8px) !important; opacity:.45 !important; pointer-events:none !important; user-select:none !important; }
+
+.lock-overlay { position:fixed; inset:0; z-index:9999; display:grid; place-items:center; padding:32px;
+  background:rgba(0,42,56,.34); backdrop-filter:blur(14px) saturate(115%); -webkit-backdrop-filter:blur(14px) saturate(115%); }
+body.gs-light .lock-overlay { background:rgba(245,241,235,.32); }
+
+.verify-card { width:476px; max-width:92vw; min-height:520px; border-radius:22px; padding:40px 34px 32px; text-align:center;
+  background:rgba(21,82,105,.78); border:1px solid rgba(255,255,255,.18); color:#fff;
+  box-shadow:0 24px 60px rgba(0,0,0,.22); animation:popIn .35s ease both; }
+body.gs-light .verify-card { background:rgba(255,255,255,.9); color:#0a3142; border:1px solid rgba(10,49,66,.10); box-shadow:0 24px 60px rgba(10,49,66,.14); }
+@keyframes popIn { from { transform:scale(.94); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+.verify-card .lock { width:58px; height:58px; margin:0 auto 22px; display:grid; place-items:center; position:relative; }
+.verify-card .lock::before { content:""; width:31px; height:24px; border:4px solid currentColor; border-radius:7px; position:absolute; bottom:7px; }
+.verify-card .lock::after { content:""; width:22px; height:24px; border:4px solid currentColor; border-bottom:0; border-radius:16px 16px 0 0; position:absolute; top:2px; }
+
+.verify-card h2 { margin:0 0 14px; font-size:26px; font-weight:900; color:inherit; }
+.verify-card p { max-width:340px; margin:0 auto 8px; color:rgba(255,255,255,.82); line-height:1.75; font-weight:600; font-size:15px; }
+body.gs-light .verify-card p { color:rgba(10,49,66,.72); }
+
+.verify-phone { width:100%; max-width:366px; margin:24px auto 8px; height:58px; border-radius:12px; padding:0 16px;
+  border:1px solid rgba(255,255,255,.26); background:rgba(255,255,255,.10); color:#fff; font-size:17px; text-align:center; outline:none; }
+body.gs-light .verify-phone { background:rgba(10,49,66,.04); color:#0a3142; border-color:rgba(10,49,66,.16); }
+.verify-phone:focus { border-color:rgba(243,220,213,.75); box-shadow:0 0 0 4px rgba(243,220,213,.10); }
+
+.otp { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; width:100%; max-width:366px; margin:28px auto 18px; direction:ltr; }
+.otp input { width:52px; min-width:0; height:64px; border-radius:12px; border:1px solid rgba(255,255,255,.26);
+  background:rgba(255,255,255,.10); color:#fff; font-size:24px; text-align:center; outline:none; }
+body.gs-light .otp input { background:rgba(10,49,66,.04); color:#0a3142; border-color:rgba(10,49,66,.16); }
+.otp input:focus { border-color:rgba(243,220,213,.75); box-shadow:0 0 0 4px rgba(243,220,213,.10); }
+
+.verify-expired { color:#ffbbb2; margin:4px auto 14px; font-weight:700; font-size:14px; }
+body.gs-light .verify-expired { color:#b15b51; }
+
+.verify-btn { width:100%; max-width:404px; margin:8px auto 0; display:block; border:0; border-radius:12px; padding:16px 18px;
+  background:#ffe7e1; color:#0a3142; font-size:15px; font-weight:900; cursor:pointer; }
+body.gs-light .verify-btn { background:linear-gradient(135deg,#1a7688,#0a3142); color:#fff; }
+.verify-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+.verify-link { display:inline-block; margin-top:20px; color:rgba(255,255,255,.58); font-weight:700; text-decoration:underline; cursor:pointer; font-size:14px; background:none; border:0; }
+body.gs-light .verify-link { color:rgba(10,49,66,.60); }

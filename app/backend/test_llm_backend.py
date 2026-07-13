@@ -23,11 +23,11 @@ from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from services import artifact_service
-from services.transaction_service import TransactionContext, SelectedNode, build_context, TransactionNotFoundError
-from security.validation import validate_request, ValidationError
-from services import llm_service
-from utils.cache import ArtifactCache, ExecutiveSummaryCache
+from app.backend.services import artifact_service
+from app.backend.services.transaction_service import TransactionContext, SelectedNode, build_context, TransactionNotFoundError
+from app.backend.security.validation import validate_request, ValidationError
+from app.backend.services import llm_service
+from app.backend.utils.cache import ArtifactCache, ExecutiveSummaryCache
 
 
 PASSED = 0

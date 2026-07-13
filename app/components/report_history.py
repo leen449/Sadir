@@ -7,7 +7,7 @@ from html import escape
 
 import streamlit as st
 
-from services import firebase_services
+from app.backend.services import firebase_services
 
 
 _HISTORY_CSS = """

@@ -26,11 +26,11 @@ from app.components.data_loader import load_all
 from app.components.graph_builder import build_graph_data
 from app.components.graph_viewer import render_graph
 from app.components.report_history import render_report_history
-from security.validation import ValidationError
-from services.llm_service import generate_explanation, generate_explanation_stream
-from services.transaction_service import SelectedNode, build_context
-from utils.cache import executive_summary_cache
-from services import firebase_services, report_service
+from app.backend.security.validation import ValidationError
+from app.backend.services.llm_service import generate_explanation, generate_explanation_stream
+from app.backend.services.transaction_service import SelectedNode, build_context
+from app.backend.utils.cache import executive_summary_cache
+from app.backend.services import firebase_services, report_service
 
 st.set_page_config(
     page_title="Investigation Workspace — GraphShield",

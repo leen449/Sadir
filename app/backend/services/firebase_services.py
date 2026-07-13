@@ -24,7 +24,7 @@ from typing import Any
 
 import firebase_admin
 from dotenv import load_dotenv
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import auth as firebase_auth, credentials, firestore, storage
 
 
 load_dotenv()
@@ -79,6 +79,40 @@ def _bucket():
     return storage.bucket()
 
 
+# =====================================================================
+# CORRECTED AUTHENTICATION FLOW
+#
+# Do NOT create a "phone_otps" collection in Firestore.
+# Manage your test numbers and static OTP codes inside the Firebase Auth Console.
+# Your frontend/client will log the user in using that test number and OTP,
+# which generates an 'id_token'. Your API passes that token here.
+# =====================================================================
+
+def verify_user_token(id_token: str) -> dict[str, Any]:
+    """Verify the Firebase ID token sent from the client/frontend.
+
+    This works for both real phone logins and Firebase Auth test phone numbers.
+    Returns a dictionary of decoded user claims on success.
+    Raises ValueError if the token is invalid, expired, or missing.
+    """
+    id_token = str(id_token or "").strip()
+    if not id_token:
+        raise ValueError("Authentication token is required.")
+
+    try:
+        decoded_token = firebase_auth.verify_id_token(id_token)
+        return {
+            "uid": decoded_token.get("uid"),
+            "phone_number": decoded_token.get("phone_number"),
+            "auth_time": decoded_token.get("auth_time"),
+        }
+    except firebase_auth.ExpiredIdTokenError:
+        raise ValueError("The authentication session has expired. Please log in again.")
+    except firebase_auth.InvalidIdTokenError:
+        raise ValueError("Invalid authentication token.")
+    except Exception as exc:
+        raise ValueError(f"Authentication failed: {exc}")
+
 def _safe_filename(filename: str) -> str:
     """Keep a readable filename while removing unsafe path characters."""
     base = os.path.basename(str(filename)).strip()
@@ -94,6 +128,7 @@ def _report_id_from_filename(filename: str) -> str:
     if match:
         return match.group(1)
     return os.path.splitext(os.path.basename(filename))[0]
+
 
 
 def save_report(

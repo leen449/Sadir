@@ -19,8 +19,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from services import artifact_service
-from services.transaction_service import SelectedNode
+from app.backend.services import artifact_service
+from app.backend.services.transaction_service import SelectedNode
 
 # Fixed, closed set of supported question IDs. The frontend may only ever
 # send one of these -- never raw prompt text (spec section 20).
