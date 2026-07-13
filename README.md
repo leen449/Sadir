@@ -140,20 +140,12 @@ GraphShield/
 │
 ├── app/
 │   │
-│   ├── main.py
 │   │
 │   ├── assets/
 │   │
-│   ├── pages/
-│   │    ├── dashboard.py             # Investigation workspace, graph, LLM interactions, report generation and history
-│   │    ├── transaction_analysis.py  # Transaction analysis page
-│   │    └── network_view.py          # Network/prediction view
-│   │
 │   ├── components/
 │   │    ├── data_loader.py           # Cached artifact loader
-│   │    ├── graph_builder.py         # Builds graph node/edge data
-│   │    ├── graph_viewer.py          # ForceGraph3D interactive component
-│   │    └── report_history.py        # Displays Report History and report download actions
+│   │    └─  graph_builder.py         # Builds graph node/edge data
 │   │
 │   └── backend/
 │        │
@@ -183,6 +175,17 @@ GraphShield/
 │        │
 │        └── test_llm_backend.py
 │
+├── graphshield-ui/                       # ==== REACT FRONTEND ====
+│   └── src/
+│        ├── assets/                       
+│        ├── main.jsx                      # React entry
+│        ├── App.jsx                     
+│        ├── App.css
+│        ├── index.css                
+│        ├── verify_gate.css
+│        ├── VerifyGate.jsx                # ✅ the OTP gate
+│        ├── firebaseConfig.js
+│        └── firebaseAuth.js
 ├── data/
 │   └── README.md
 │
