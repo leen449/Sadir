@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
 
@@ -167,3 +167,20 @@ def download_saved_report(storage_path: str):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@app.post("/api/auth/verify-token")
+def verify_token(id_token: str = Body(..., embed=True)):
+    """Verify a Firebase ID token sent from the client/frontend."""
+    token = str(id_token or "").strip()
+    if not token:
+        raise HTTPException(status_code=400, detail="Authentication token is required.")
+
+    try:
+        user = firebase_services.verify_user_token(token)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Authentication failed: {e}")
+
+    return {"verified": True, "user": user}
