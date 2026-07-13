@@ -1,17 +1,29 @@
-torch
-torch-geometric
+
+Node.js 18+
+npm
+Python 3.10+
+ pip
+React
+React DOM
+Vite
+@vitejs/plugin-react
+Firebase JavaScript SDK
+react-force-graph-3d
+FastAPI
+Uvicorn
 pandas
 numpy
+torch
+torch-geometric
 scikit-learn
 xgboost
 shap
 networkx
-plotly
-pyvis
-networkx
-matplotlib
-streamlit
 openai
 firebase-admin
 python-dotenv
-fastapi
+reportlab
+Firebase Authentication
+Firebase Storage
+Firestore
+Azure OpenAI
