@@ -186,7 +186,7 @@ GraphShield/
 │        ├── App.css
 │        ├── index.css                
 │        ├── verify_gate.css
-│        ├── VerifyGate.jsx                # ✅ the OTP gate
+│        ├── VerifyGate.jsx                # the OTP gate
 │        ├── firebaseConfig.js
 │        └── firebaseAuth.js
 ├── data/
