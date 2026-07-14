@@ -88,17 +88,35 @@ export default function App() {
     document.body.classList.toggle("gs-light", !dark);
   }, [dark]);
 
+  // Fetch the graph, but PRESERVE existing node positions so unchanged nodes
+  // stay put instead of the whole layout re-exploding. Only genuinely new
+  // nodes get placed by the simulation.
   const loadGraph = useCallback(() => {
     fetch(`/api/graph?top_n_targets=${topN}&max_neighbors=${maxNb}&num_normal=${numNorm}`)
-      .then((r) => r.json()).then(setGraph)
+      .then((r) => r.json())
+      .then((data) => {
+        setGraph((prev) => {
+          const pos = new Map(prev.nodes.map((n) => [n.id, n]));
+          const nodes = data.nodes.map((n) => {
+            const old = pos.get(n.id);
+            // carry over x/y/z (and fix them briefly) if the node already existed
+            return old ? { ...n, x: old.x, y: old.y, z: old.z } : n;
+          });
+          return { nodes, links: data.links };
+        });
+      })
       .catch((e) => console.error("graph load failed", e));
   }, [topN, maxNb, numNorm]);
 
-  useEffect(() => {
+  // NOTE: no auto-fetch effect here — we fetch only when a slider is released
+  // (commitGraph), which stops the mid-drag double/triple reloads.
+  const commitGraph = useCallback(() => {
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(loadGraph, 250);
-    return () => clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(loadGraph, 50);
   }, [loadGraph]);
+
+  // initial load once on mount
+  useEffect(() => { loadGraph(); /* eslint-disable-next-line */ }, []);
 
   useEffect(() => { loadHistory(); }, []);
   useEffect(() => () => esRef.current?.close(), []);
@@ -272,17 +290,20 @@ export default function App() {
                 <div className="slider-cell">
                   <label>Target Transactions</label><div className="sval">{topN}</div>
                   <input type="range" min="5" max="30" value={topN} style={{ "--pct": `${pct(topN, 5, 30)}%` }}
-                    onChange={(e) => setTopN(+e.target.value)} />
+                    onChange={(e) => setTopN(+e.target.value)}
+                    onMouseUp={commitGraph} onTouchEnd={commitGraph} onKeyUp={commitGraph} />
                 </div>
                 <div className="slider-cell">
                   <label>Maximum Neighbors per Target</label><div className="sval">{maxNb}</div>
                   <input type="range" min="10" max="40" value={maxNb} style={{ "--pct": `${pct(maxNb, 10, 40)}%` }}
-                    onChange={(e) => setMaxNb(+e.target.value)} />
+                    onChange={(e) => setMaxNb(+e.target.value)}
+                    onMouseUp={commitGraph} onTouchEnd={commitGraph} onKeyUp={commitGraph} />
                 </div>
                 <div className="slider-cell">
                   <label>Normal Nodes</label><div className="sval">{numNorm}</div>
                   <input type="range" min="5" max="20" value={numNorm} style={{ "--pct": `${pct(numNorm, 5, 20)}%` }}
-                    onChange={(e) => setNumNorm(+e.target.value)} />
+                    onChange={(e) => setNumNorm(+e.target.value)}
+                    onMouseUp={commitGraph} onTouchEnd={commitGraph} onKeyUp={commitGraph} />
                 </div>
               </div>
             </div>
@@ -341,6 +362,8 @@ export default function App() {
             ref={fgRef}
             graphData={graph}
             nodeId="id"
+            warmupTicks={20}
+            cooldownTime={1800}
             nodeLabel={(n) => `${n.txId} (${n.prediction})`}
             nodeColor={nodeColor}
             nodeVal={nodeVal}

@@ -17,13 +17,14 @@ body.gs-dark,  body.gs-dark  #root { background:#0a3142; }
 body.gs-light .gs-main-header { background:rgba(255,255,255,.72); border-bottom:1px solid rgba(216,227,234,.72);
   box-shadow:0 10px 35px rgba(6,49,66,.055); }
 .gs-brand { display:flex; align-items:center; gap:14px; }
-.gs-logo { width:69px; height:60px; background:rgba(6,49,66,.12); border-radius:18px; display:grid; place-items:center;
-  overflow:hidden; border:1px solid rgba(255,255,255,.12); box-shadow:0 12px 30px rgba(6,49,66,.12);
-  font-weight:800; color:#07506a; font-size:13px; letter-spacing:.02em; }
-.gs-logo img { width: 100%; height: 100%; object-fit: contain; }
+/* Logo tile blends into the header: transparent so its background IS the header.
+   Transparent PNG logos sit directly on the glass, no cream square. */
+.gs-logo { width:69px; height:60px; background:transparent; border-radius:18px; display:grid; place-items:center;
+  overflow:hidden; border:none; box-shadow:none;
+  font-weight:800; color:#fff; font-size:13px; letter-spacing:.02em; }
+.gs-logo img { width:100%; height:100%; object-fit:contain; }
+body.gs-light .gs-logo { color:#07506a; }
 .gs-brand h1 { margin:0; font-size:20px; color:#fff; }
-body.gs-light .gs-logo { background: rgba(6,49,66,.10); border-color: rgba(6,49,66,.13); }
-body.gs-dark .gs-logo { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); }
 body.gs-light .gs-brand h1 { color:#063142; }
 .gs-brand p { margin:5px 0 0; font-size:9px; letter-spacing:1.7px; color:#b9d7e3; text-transform:uppercase; white-space:nowrap; }
 body.gs-light .gs-brand p { color:#6b7c88; }
