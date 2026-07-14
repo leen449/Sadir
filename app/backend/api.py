@@ -3,7 +3,9 @@ from typing import Optional
 from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, Response
-
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.components.data_loader import load_all
 from app.components.graph_builder import build_graph_data
 from app.backend.services.transaction_service import (
@@ -184,3 +186,12 @@ def verify_token(id_token: str = Body(..., embed=True)):
         raise HTTPException(status_code=502, detail=f"Authentication failed: {e}")
 
     return {"verified": True, "user": user}
+# Vite build output, copied here by the Render build command
+DIST = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.isdir(DIST):
+    app.mount("/assets", StaticFiles(directory=os.path.join(DIST, "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    def spa(full_path: str):
+        return FileResponse(os.path.join(DIST, "index.html"))
