@@ -179,7 +179,7 @@ body.gs-light .report-download-link { color:#063142; }
 body.gs-light .report-download-link:hover { background:#eef4f7; }
 .hist-card { border-radius:18px; padding:22px 24px; margin-bottom:20px; background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.10); color:#fff; }
-body.gs-light .hist-card { background:#f4f8fb; border:1px solid #d8e3ea; color:#063142; }
+body.gs-light .hist-card { background:#fff; border:1px solid #d8e3ea; color:#063142; }
 .hist-card h3 { margin:0 0 12px; font-size:20px; }
 .hist-meta { font-size:14px; opacity:.8; margin:4px 0; }
 .report-history-status { display:inline-block; margin-top:10px; padding:7px 14px; border-radius:999px; font-weight:700;
